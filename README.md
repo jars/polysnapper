@@ -32,7 +32,7 @@ Check out [the jsfiddle](http://jsfiddle.net/jordanarseno/xw6gp9yq/17/)
 
 a brief example might look like:
 
-
+```javascript
     var SM = PolySnapper({
           map: map,
           threshold: 20,
@@ -59,3 +59,4 @@ a brief example might look like:
     //and disable the manager (exit drawing mode and clean up poly).
     //you should now use the_poly as a polygon reference
     SM.disable();
+```
