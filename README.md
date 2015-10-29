@@ -43,10 +43,13 @@ a brief example might look like:
           polystyle: polystyle,
           hidePOI: true,
           onEnabled: function(){
-    		console.log("enabled")
+    		console.log("enabled");
           },
           onDisabled: function(){
-    		console.log("disabled")
+    		console.log("disabled");
+          },
+          onChange: function(){
+            console.log("a point was added, removed, or moved.");
           }
     });
     
