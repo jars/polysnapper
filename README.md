@@ -33,7 +33,7 @@ Check out [the jsfiddle](http://jsfiddle.net/jordanarseno/xw6gp9yq/18/)
 a brief example might look like:
 
 ```javascript
-    var SM = PolySnapper({
+    var PS = PolySnapper({
           map: map,
           threshold: 20,
           key: 'shift',
@@ -50,13 +50,13 @@ a brief example might look like:
     });
     
     //first enable the manager (enter drawing mode)
-    SM.enable();
+    PS.enable();
     
     //user draws the polygon, point by point, snapping when necessary.
     //now, retrieve the polygon from the manager.
-    the_poly = SM.poly();
+    the_poly = PS.poly();
     
     //and disable the manager (exit drawing mode and clean up poly).
     //you should now use the_poly as a polygon reference
-    SM.disable();
+    PS.disable();
 ```
