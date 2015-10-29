@@ -2,7 +2,7 @@
 
 Google Maps V3 Polygon Snapping
 
-Check out [the jsfiddle](http://jsfiddle.net/jordanarseno/xw6gp9yq/18/)
+Check out [the jsfiddle](http://jsfiddle.net/jordanarseno/xw6gp9yq/19/)
 
 ----
 
@@ -18,7 +18,7 @@ Check out [the jsfiddle](http://jsfiddle.net/jordanarseno/xw6gp9yq/18/)
 - **`hidePOI`**: when drawing polygons, often Points of Interest get in the way of click events. You can automagically hide them on `enable()` and show them on `disable()`.
 - **`onEnabled`**: a callback once `enabled()` has been called.
 - **`onDisabled`**: a callback once `disabled()` has been called. 
-
+- **`onChange`**: a callback when a point is added, removed, or moved.
 ----
 
 ###methods
