@@ -19,6 +19,7 @@ Check out [the jsfiddle](http://jsfiddle.net/jordanarseno/xw6gp9yq/19/)
 - **`onEnabled`**: a callback once `enabled()` has been called.
 - **`onDisabled`**: a callback once `disabled()` has been called. 
 - **`onChange`**: a callback when a point is added, removed, or moved.
+
 ----
 
 ###methods
