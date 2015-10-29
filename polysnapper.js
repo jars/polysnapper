@@ -16,7 +16,7 @@
 
 */
 
-function Polysnapper(opts){
+function PolySnapper(opts){
   
     function defined(obj, key){
       return typeof obj[key] !== 'undefined'
@@ -94,7 +94,7 @@ function Polysnapper(opts){
         polygon: function(){
           return that.currentpoly;
         },
-      enabled: function(){
+        enabled: function(){
           return that.drawing;
         },
         enable: function(){
