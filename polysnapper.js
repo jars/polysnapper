@@ -33,10 +33,14 @@ function PolySnapper(opts){
     var _thresh   = ( defined(opts, 'threshold') )?   opts.threshold : 20;
     var _key      = ( defined(opts, 'key') )?     opts.key : 'shift';
     var _keyReq   = ( defined(opts, 'keyRequired') )? opts.keyRequired : false;
+    
     var _onEnabled  = ( defined(opts, 'onEnabled') )?   opts.onEnabled : function(){};
     var _onDisabled = ( defined(opts, 'onDisabled') )?  opts.onDisabled : function(){}; 
+    var _onChange = ( defined(opts, 'onChange') )? opts.onChange : function(){};
+
     var _polystyle  = ( defined(opts, 'polystyle') )? opts.polystyle : {};
     var _hidePOI  = ( defined(opts, 'hidePOI') )?   opts.hidePOI : false;
+
     
     var _keyDown = false;
     
@@ -81,7 +85,8 @@ function PolySnapper(opts){
             'ctrl': 17
         }
         var which = keymap[_key];
-      window.onkeydown = function(e) {
+        
+        window.onkeydown = function(e) {
             _keyDown = (e.which == which);
         };
 
@@ -119,6 +124,7 @@ function PolySnapper(opts){
 
               if (e.vertex != null && this.getPath().getLength() > 3) {
                   this.getPath().removeAt(e.vertex);
+                  _onChange();
               }
 
             });
@@ -130,6 +136,7 @@ function PolySnapper(opts){
                 // and it will automatically appear.
                 var ll = (last_closeby && (!_keyReq || _keyReq && _keyDown) )? last_closeby : e.latLng; 
                 that.currentpoly.getPath().push(ll);
+                _onChange();
 
             });
 
@@ -146,6 +153,7 @@ function PolySnapper(opts){
                 google.maps.event.addListenerOnce(currentpoly.getPath(), "set_at", function(idx){
                     if(last_closeby && (!_keyReq || _keyReq && _keyDown)) that.currentpoly.getPath().setAt(idx, last_closeby);
                     setAtRecurse();
+                    _onChange();
                 });
             }());
       
@@ -154,6 +162,7 @@ function PolySnapper(opts){
                 google.maps.event.addListenerOnce(currentpoly.getPath(), "insert_at", function(idx){
                     if(last_closeby && (!_keyReq || _keyReq && _keyDown)) that.currentpoly.getPath().setAt(idx, last_closeby);
                     insertAtRecurse();
+                    _onChange();
                 });
             }());
 
