@@ -1,4 +1,4 @@
-# polysnapper
+# PolySnapper
 
 Google Maps V3 Polygon Snapping
 
