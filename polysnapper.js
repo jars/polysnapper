@@ -10,31 +10,14 @@
 
 @jordanarseno - MIT LICENSE
 
-*/ 
+1. requires jquery and underscore.
+2. looking to remove these dependencies
+3. see http://stackoverflow.com/a/33338065/568884 for API.
 
-function PolySnapper(opts){ 
+*/
 
-    function extend(obj) {
-
-        Array.prototype.slice.call(arguments, 1).forEach(function(source) {
-            if (source) {
-                for (var prop in source) {
-                    if (source[prop].constructor === Object) {
-                        if (!obj[prop] || obj[prop].constructor === Object) {
-                            obj[prop] = obj[prop] || {};
-                            extend(obj[prop], source[prop]);
-                        } else {
-                            obj[prop] = source[prop];
-                        }
-                    } else {
-                        obj[prop] = source[prop];
-                    }
-                }
-            }
-        });
-        return obj;
-    }
-
+function PolySnapper(opts){
+  
     function defined(obj, key){
       return typeof obj[key] !== 'undefined'
     }
@@ -44,6 +27,9 @@ function PolySnapper(opts){
     this.drawing    = false;
     this.currentpoly = null;
     this.polys    = ( defined(opts, 'polygons') )?  opts.polygons : [];
+    
+    this.keyDownListener = null;
+    this.keyUpListener   = null;
     
     var _map      = ( defined(opts, 'map')  )?    opts.map : null;
     var _marker   = ( defined(opts, 'marker') )?    opts.marker : new google.maps.Marker(); 
@@ -55,10 +41,10 @@ function PolySnapper(opts){
     var _onDisabled = ( defined(opts, 'onDisabled') )?  opts.onDisabled : function(){}; 
     var _onChange = ( defined(opts, 'onChange') )? opts.onChange : function(){};
 
-    var _polystyle  = ( defined(opts, 'polystyle') )? opts.polystyle : {};
+    //this needs to be cloned because it gets extended!
+    var _polystyle  = ( defined(opts, 'polystyle') )? (JSON.parse(JSON.stringify( opts.polystyle ))): {};
     var _hidePOI  = ( defined(opts, 'hidePOI') )?   opts.hidePOI : false;
 
-    
     var _keyDown = false;
     
     if( !_map ){
@@ -100,16 +86,18 @@ function PolySnapper(opts){
         var keymap = {
           'shift': 16,
             'ctrl': 17
-        }
-        var which = keymap[_key];
-        
-        window.onkeydown = function(e) {
-            _keyDown = (e.which == which);
         };
 
-        window.onkeyup = function(e) {
+        var which = keymap[_key];
+        
+        this.keyDownListener = window.addEventListener("keydown", function(e){
+            _keyDown = (e.which == which);
+        });
+
+        this.keyUpListener = window.addEventListener("keyup", function(e){
             _keyDown = (e.which == which)? false : true;
-        };
+        });
+
     }
     
     return {
@@ -125,16 +113,16 @@ function PolySnapper(opts){
             
             if( _hidePOI ) _map.poi(false);
             
-            var vertexMarker        = _marker;
-            var snapable_polys      = that.polys.filter( function(p){ return ( typeof p.snapable !== 'undefined' && p.snapable ) } );
-            var snapable_points     = snapable_polys.map( function(p){ return p.getPath().getArray() } ).reduce(function(a,b){ return a.concat(b) });
-            var last_closeby        = null;
+            var vertexMarker = _marker;
+            var snapable_polys = _.filter(that.polys, function(p){ return ( _.has(p, 'snapable') && p.snapable ) })
+            var snapable_points = _.flatten ( _.map(snapable_polys, function(p){ return p.getPath().getArray() }) ) ;
+            var last_closeby = null;
             
             //the official Drawing Manager will not work!
             _map.setOptions({draggableCursor:'crosshair'});
 
             that.currentpoly = new google.maps.Polygon(
-              extend( _polystyle, {editable: true, map: _map})
+              $.extend( _polystyle, {editable: true, map: _map})
             );
 
             that.currentpoly.addListener('rightclick', function(e){
@@ -190,9 +178,10 @@ function PolySnapper(opts){
                 instead, we must attach mousemove to the mapcanvas (jquery), and then 
                 convert x,y coordinates in the map canvas to lat lng points.
             */
-            var mapdiv = document.getElementById( _map.getDiv().getAttribute('id') );
             
-            mapdiv.onmousemove  = function(e){
+            $(document).on("mousemove", "#" + _map.getDiv().getAttribute('id'), function(e){
+                console.log("moving")
+                var $this = $(this);
 
                 bounds   = _map.getBounds();
                 neLatlng = bounds.getNorthEast();
@@ -202,15 +191,15 @@ function PolySnapper(opts){
                 endLat   = swLatlng.lat();
                 startLng = swLatlng.lng();
 
-                lat = startLat + (( e.offsetY/ this.offsetHeight ) * (endLat - startLat));
-                lng = startLng + (( e.offsetX/ this.offsetWidth )  * (endLng - startLng));
+                lat = startLat + (( e.offsetY/ $this.height() ) * (endLat - startLat));
+                lng = startLng + (( e.offsetX/ $this.width() )  * (endLng - startLng));
 
                 var ll = new google.maps.LatLng(lat, lng);
 
-                //find any of the existing polygon points are close to the mousepointer
-                var closeby = snapable_points.filter ( function(p){ 
+                //find any of the existing polygon points (granville and burrard) are close to the mousepointer
+                var closeby = _.find(snapable_points, function(p){ 
                     return ( google.maps.geometry.spherical.computeDistanceBetween(ll, p) ) < _thresh 
-                })[0] || null;
+                }) || null;
 
                 /* we could just use:
 
@@ -240,7 +229,7 @@ function PolySnapper(opts){
                 }
 
 
-            };
+            });
             
             //now execute the callback
             _onEnabled();
@@ -250,11 +239,20 @@ function PolySnapper(opts){
             if(_hidePOI) _map.poi(true);
             
             that.drawing = false;
+
             _map.setOptions({draggableCursor:null});
+            
             that.currentpoly.setMap(null);
             
             //annnd the callback
             _onDisabled();
+
+            if(_keyReq){
+
+                window.removeEventListener("keydown", this.keyDownListener);
+                window.removeEventListener("keyup", this.keyUpListener);
+
+            }
         }
         
     }
