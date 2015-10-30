@@ -10,14 +10,31 @@
 
 @jordanarseno - MIT LICENSE
 
-1. requires jquery and underscore.
-2. looking to remove these dependencies
-3. see http://stackoverflow.com/a/33338065/568884 for API.
+*/ 
 
-*/
+function PolySnapper(opts){ 
 
-function PolySnapper(opts){
-  
+    function extend(obj) {
+
+        Array.prototype.slice.call(arguments, 1).forEach(function(source) {
+            if (source) {
+                for (var prop in source) {
+                    if (source[prop].constructor === Object) {
+                        if (!obj[prop] || obj[prop].constructor === Object) {
+                            obj[prop] = obj[prop] || {};
+                            extend(obj[prop], source[prop]);
+                        } else {
+                            obj[prop] = source[prop];
+                        }
+                    } else {
+                        obj[prop] = source[prop];
+                    }
+                }
+            }
+        });
+        return obj;
+    }
+
     function defined(obj, key){
       return typeof obj[key] !== 'undefined'
     }
@@ -108,16 +125,16 @@ function PolySnapper(opts){
             
             if( _hidePOI ) _map.poi(false);
             
-            var vertexMarker = _marker;
-            var snapable_polys = _.filter(that.polys, function(p){ return ( _.has(p, 'snapable') && p.snapable ) })
-            var snapable_points = _.flatten ( _.map(snapable_polys, function(p){ return p.getPath().getArray() }) ) ;
-            var last_closeby = null;
+            var vertexMarker        = _marker;
+            var snapable_polys      = that.polys.filter( function(p){ return ( typeof p.snapable !== 'undefined' && p.snapable ) } );
+            var snapable_points     = snapable_polys.map( function(p){ return p.getPath().getArray() } ).reduce(function(a,b){ return a.concat(b) });
+            var last_closeby        = null;
             
             //the official Drawing Manager will not work!
             _map.setOptions({draggableCursor:'crosshair'});
 
             that.currentpoly = new google.maps.Polygon(
-              $.extend( _polystyle, {editable: true, map: _map})
+              extend( _polystyle, {editable: true, map: _map})
             );
 
             that.currentpoly.addListener('rightclick', function(e){
@@ -173,10 +190,9 @@ function PolySnapper(opts){
                 instead, we must attach mousemove to the mapcanvas (jquery), and then 
                 convert x,y coordinates in the map canvas to lat lng points.
             */
+            var mapdiv = document.getElementById( _map.getDiv().getAttribute('id') );
             
-            $(document).on("mousemove", "#" + _map.getDiv().getAttribute('id'), function(e){
-
-                var $this = $(this);
+            mapdiv.onmousemove  = function(e){
 
                 bounds   = _map.getBounds();
                 neLatlng = bounds.getNorthEast();
@@ -186,15 +202,15 @@ function PolySnapper(opts){
                 endLat   = swLatlng.lat();
                 startLng = swLatlng.lng();
 
-                lat = startLat + (( e.offsetY/ $this.height() ) * (endLat - startLat));
-                lng = startLng + (( e.offsetX/ $this.width() )  * (endLng - startLng));
+                lat = startLat + (( e.offsetY/ this.offsetHeight ) * (endLat - startLat));
+                lng = startLng + (( e.offsetX/ this.offsetWidth )  * (endLng - startLng));
 
                 var ll = new google.maps.LatLng(lat, lng);
 
-                //find any of the existing polygon points (granville and burrard) are close to the mousepointer
-                var closeby = _.find(snapable_points, function(p){ 
+                //find any of the existing polygon points are close to the mousepointer
+                var closeby = snapable_points.filter ( function(p){ 
                     return ( google.maps.geometry.spherical.computeDistanceBetween(ll, p) ) < _thresh 
-                }) || null;
+                })[0] || null;
 
                 /* we could just use:
 
@@ -224,7 +240,7 @@ function PolySnapper(opts){
                 }
 
 
-            });
+            };
             
             //now execute the callback
             _onEnabled();
