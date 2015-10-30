@@ -4,6 +4,8 @@ Google Maps V3 Polygon Snapping
 
 Check out [the jsfiddle](http://jsfiddle.net/jordanarseno/xw6gp9yq/19/)
 
+Vanilla JS: No Deps.
+
 ----
 
 ###properties
