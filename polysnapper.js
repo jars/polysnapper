@@ -58,8 +58,8 @@ function PolySnapper(opts){
     var _onDisabled = ( defined(opts, 'onDisabled') )?  opts.onDisabled : function(){}; 
     var _onChange = ( defined(opts, 'onChange') )? opts.onChange : function(){};
 
-    var _polystyle  = ( defined(opts, 'polystyle') )? opts.polystyle : {};
-    var _hidePOI  = ( defined(opts, 'hidePOI') )?   opts.hidePOI : false;
+    var _polystyle  = ( defined(opts, 'polystyle') )? (JSON.parse(JSON.stringify(opts.polystyle))) : {};
+    var _hidePOI    = ( defined(opts, 'hidePOI') )?   opts.hidePOI : false;
 
     
     var _keyDown = false;
