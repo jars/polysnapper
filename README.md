@@ -27,7 +27,7 @@ Check out [the jsfiddle](http://jsfiddle.net/jordanarseno/xw6gp9yq/19/)
 - **`enable()`**: invoke the custom drawing manager to begin drawing your polygon.
 - **`disable()`**: cancel the custom drawing manager and remove the polygon from the map.
 - **`enabled()`**: a boolean. whether we are in the enabled state, or not.
-- **`poly()`**: returns the currently editing polygon. You should call this immediately before calling `disable()` to get a copy of your polygon.
+- **`polygon()`**: returns the currently editing polygon. You should call this immediately before calling `disable()` to get a copy of your polygon.
 
 ----
 
@@ -58,7 +58,7 @@ a brief example might look like:
     
     //user draws the polygon, point by point, snapping when necessary.
     //now, retrieve the polygon from the manager.
-    the_poly = PS.poly();
+    the_poly = PS.polygon();
     
     //and disable the manager (exit drawing mode and clean up poly).
     //you should now use the_poly as a polygon reference
