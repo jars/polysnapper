@@ -1,0 +1,19 @@
+{
+  "name": "polysnapper",
+  "main": "polysnapper.js",
+  "authors": [
+    "Jordan Arseno <jarsenault@semios.com>"
+  ],
+  "description": "google maps v3 polygon snapping utility",
+  "moduleType": [],
+  "keywords": [
+    "google",
+    "maps",
+    "v3",
+    "polygon",
+    "snap",
+    "snapping"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/jordanarseno/polysnapper"
+}
