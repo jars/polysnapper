@@ -60,14 +60,15 @@ function PolySnapper(opts){
 
     var _polystyle  = ( defined(opts, 'polystyle') )? (JSON.parse(JSON.stringify(opts.polystyle))) : {};
     var _hidePOI    = ( defined(opts, 'hidePOI') )?   opts.hidePOI : false;
-
     
     var _keyDown = false;
     
     if( !_map ){
       console.log("We need to know the map");
-        return;
+      return;
     }
+
+    var _mapDiv = document.getElementById( _map.getDiv().getAttribute('id') );
     
     if( _hidePOI ){
       
@@ -193,10 +194,9 @@ function PolySnapper(opts){
                 instead, we must attach mousemove to the mapcanvas (jquery), and then 
                 convert x,y coordinates in the map canvas to lat lng points.
             */
-            var mapdiv = document.getElementById( _map.getDiv().getAttribute('id') );
-            
-            mapdiv.onmousemove  = function(e){
 
+            _mapDiv.onmousemove  = function(e){
+                
                 bounds   = _map.getBounds();
                 neLatlng = bounds.getNorthEast();
                 swLatlng = bounds.getSouthWest();
@@ -256,15 +256,18 @@ function PolySnapper(opts){
             _map.setOptions({draggableCursor:null});
             that.currentpoly.setMap(null);
             
-            //annnd the callback
-            _onDisabled();
+            _mapDiv.onmousemove = null;
 
-             if(_keyReq){
+            if(_keyReq){
 
                 window.removeEventListener("keydown", this.keyDownListener);
                 window.removeEventListener("keyup", this.keyUpListener);
 
             }
+
+            //annnd the callback
+            _onDisabled();
+
         }
         
     }
