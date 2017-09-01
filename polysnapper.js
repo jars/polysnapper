@@ -131,7 +131,7 @@ function PolySnapper(opts){
             
             var vertexMarker        = _marker;
             var snapable_polys      = that.polys.filter( function(p){ return ( typeof p.snapable !== 'undefined' && p.snapable ) } );
-            var snapable_points     = snapable_polys.map( function(p){ return p.getPath().getArray() } ).reduce(function(a,b){ return a.concat(b) }, []);
+            var snapable_points     = snapable_polys.map( function(p){ return p.getPaths() } ).map(function(a){ return a.getArray().map(function(b){ return b.getArray() }).reduce(function(a,b){ return a.concat(b) }, []) }, []).reduce(function(a,b){ return a.concat(b) }, []);
             var last_closeby        = null;
             
             //the official Drawing Manager will not work!
