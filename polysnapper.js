@@ -1,18 +1,18 @@
 /*
-             _                                             
-            | |                                            
- _ __   ___ | |_   _ ___ _ __   __ _ _ __  _ __   ___ _ __ 
+             _
+            | |
+ _ __   ___ | |_   _ ___ _ __   __ _ _ __  _ __   ___ _ __
 | '_ \ / _ \| | | | / __| '_ \ / _` | '_ \| '_ \ / _ \ '__|
-| |_) | (_) | | |_| \__ \ | | | (_| | |_) | |_) |  __/ |   
-| .__/ \___/|_|\__, |___/_| |_|\__,_| .__/| .__/ \___|_|   
-| |             __/ |               | |   | |              
-|_|            |___/                |_|   |_|              
+| |_) | (_) | | |_| \__ \ | | | (_| | |_) | |_) |  __/ |
+| .__/ \___/|_|\__, |___/_| |_|\__,_| .__/| .__/ \___|_|
+| |             __/ |               | |   | |
+|_|            |___/                |_|   |_|
 
 @jordanarseno - MIT LICENSE
 
-*/ 
+*/
 
-function PolySnapper(opts){ 
+function PolySnapper(opts){
 
     function extend(obj) {
 
@@ -38,40 +38,41 @@ function PolySnapper(opts){
     function defined(obj, key){
       return typeof obj[key] !== 'undefined'
     }
-    
+
     var that = this;
-    
+
     this.keyDownListener = null;
     this.keyUpListener   = null;
+    this.clickListener = null;
 
     this.drawing    = false;
     this.currentpoly = null;
     this.polys    = ( defined(opts, 'polygons') )?  opts.polygons : [];
-    
+
     var _map      = ( defined(opts, 'map')  )?    opts.map : null;
-    var _marker   = ( defined(opts, 'marker') )?    opts.marker : new google.maps.Marker(); 
+    var _marker   = ( defined(opts, 'marker') )?    opts.marker : new google.maps.Marker();
     var _thresh   = ( defined(opts, 'threshold') )?   opts.threshold : 20;
     var _key      = ( defined(opts, 'key') )?     opts.key : 'shift';
     var _keyReq   = ( defined(opts, 'keyRequired') )? opts.keyRequired : false;
-    
+
     var _onEnabled  = ( defined(opts, 'onEnabled') )?   opts.onEnabled : function(){};
-    var _onDisabled = ( defined(opts, 'onDisabled') )?  opts.onDisabled : function(){}; 
+    var _onDisabled = ( defined(opts, 'onDisabled') )?  opts.onDisabled : function(){};
     var _onChange = ( defined(opts, 'onChange') )? opts.onChange : function(){};
 
     var _polystyle  = ( defined(opts, 'polystyle') )? (JSON.parse(JSON.stringify(opts.polystyle))) : {};
     var _hidePOI    = ( defined(opts, 'hidePOI') )?   opts.hidePOI : false;
-    
+
     var _keyDown = false;
-    
+
     if( !_map ){
       console.log("We need to know the map");
       return;
     }
 
     var _mapDiv = document.getElementById( _map.getDiv().getAttribute('id') );
-    
+
     if( _hidePOI ){
-      
+
         _map.poi = function(state){
 
           var styles = [
@@ -96,11 +97,11 @@ function PolySnapper(opts){
           this.set("styles", (state)? {} : styles );
 
         }
-        
+
     }
-    
+
     if( _keyReq ){
-        
+
         var keymap = {
           'shift': 16,
             'ctrl': 17
@@ -115,7 +116,7 @@ function PolySnapper(opts){
             _keyDown = (e.which == which)? false : true;
         });
     }
-    
+
     return {
         polygon: function(){
           return that.currentpoly;
@@ -124,16 +125,16 @@ function PolySnapper(opts){
           return that.drawing;
         },
         enable: function(){
-          
+
             that.drawing = true;
-            
+
             if( _hidePOI ) _map.poi(false);
-            
+
             var vertexMarker        = _marker;
             var snapable_polys      = that.polys.filter( function(p){ return ( typeof p.snapable !== 'undefined' && p.snapable ) } );
             var snapable_points     = snapable_polys.map( function(p){ return p.getPath().getArray() } ).reduce(function(a,b){ return a.concat(b) }, []);
             var last_closeby        = null;
-            
+
             //the official Drawing Manager will not work!
             _map.setOptions({draggableCursor:'crosshair'});
 
@@ -150,12 +151,12 @@ function PolySnapper(opts){
 
             });
 
-            //you can delete vertices in the current polygon by right clicking them 
-            _map.addListener("click", function(e){
+            //you can delete vertices in the current polygon by right clicking them
+            that.clickListener = _map.addListener("click", function(e){
 
                 // Because path is an MVCArray, we can simply append a new coordinate
                 // and it will automatically appear.
-                var ll = (last_closeby && (!_keyReq || _keyReq && _keyDown) )? last_closeby : e.latLng; 
+                var ll = (last_closeby && (!_keyReq || _keyReq && _keyDown) )? last_closeby : e.latLng;
                 that.currentpoly.getPath().push(ll);
                 _onChange();
 
@@ -177,7 +178,7 @@ function PolySnapper(opts){
                     _onChange();
                 });
             }());
-      
+
             //Same comments go for insert_at ...
             (function insertAtRecurse(){
                 google.maps.event.addListenerOnce(currentpoly.getPath(), "insert_at", function(idx){
@@ -187,16 +188,16 @@ function PolySnapper(opts){
                 });
             }());
 
-            
+
             /*
                 we cannot listen to move events on the gmap object.. because when we
                 drag existing points, or new ones, the mouse move events are suspended
-                instead, we must attach mousemove to the mapcanvas (jquery), and then 
+                instead, we must attach mousemove to the mapcanvas (jquery), and then
                 convert x,y coordinates in the map canvas to lat lng points.
             */
 
             _mapDiv.onmousemove  = function(e){
-                
+
                 bounds   = _map.getBounds();
                 neLatlng = bounds.getNorthEast();
                 swLatlng = bounds.getSouthWest();
@@ -211,13 +212,13 @@ function PolySnapper(opts){
                 var ll = new google.maps.LatLng(lat, lng);
 
                 //find any of the existing polygon points are close to the mousepointer
-                var closeby = snapable_points.filter ( function(p){ 
-                    return ( google.maps.geometry.spherical.computeDistanceBetween(ll, p) ) < _thresh 
+                var closeby = snapable_points.filter ( function(p){
+                    return ( google.maps.geometry.spherical.computeDistanceBetween(ll, p) ) < _thresh
                 })[0] || null;
 
                 /* we could just use:
 
-                    if(closeby){    
+                    if(closeby){
                         vertexMarker.setOptions({
                             position: closeby,
                             map: map
@@ -232,7 +233,7 @@ function PolySnapper(opts){
 
                 */
 
-                if(closeby && closeby != last_closeby){    
+                if(closeby && closeby != last_closeby){
                     last_closeby = closeby;
                     vertexMarker.setPosition(closeby);
                     vertexMarker.setMap(_map);
@@ -244,19 +245,20 @@ function PolySnapper(opts){
 
 
             };
-            
+
             //now execute the callback
             _onEnabled();
         },
         disable: function(){
-          
+
             if(_hidePOI) _map.poi(true);
-            
+
             that.drawing = false;
             _map.setOptions({draggableCursor:null});
             that.currentpoly.setMap(null);
-            
+
             _mapDiv.onmousemove = null;
+            that.clickListener.remove();
 
             if(_keyReq){
 
@@ -269,7 +271,7 @@ function PolySnapper(opts){
             _onDisabled();
 
         }
-        
+
     }
-    
-} 
+
+}
